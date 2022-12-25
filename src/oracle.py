@@ -1,8 +1,10 @@
 import numpy as np
 from collections import deque
 import cvxpy as cp
+from mpi4py import MPI
 
 from typing import Tuple, Dict
+
 
 class Oracle:
 
@@ -20,6 +22,10 @@ class Oracle:
   self.index_functions = index_functions
   self.accuracy = float("inf")
   self.tol = float("inf") 
+
+  # self.comm = MPI.COMM_WORLD
+  # self.rank = comm.Get_rank()
+
   return
 
  '''
@@ -48,13 +54,13 @@ class Oracle:
  '''
   Return the evaluation of f at a given point x
  '''
- def f(self, var_x, function):
+ def f(self, var_x, function: Tuple):
   # Get the constant/vector/matrix
   term = function[1]
   # Evaluate function
   return function[2]( term, var_x )
 
- def g(self, var_x, function):
+ def g(self, var_x, function: Tuple):
   term = function[1]
   return function[3]( term, var_x )
 
@@ -64,7 +70,7 @@ class Oracle:
    - f(x_i) or [ underline{f}, bar{f} ] are computed
    - g in { partial f(x_i) } is computed
  '''
- def compute(self, var_x, component, accuracy, tolerance, caller) -> Tuple[ float, np.array ]:
+ def compute(self, var_x: np.array, component: int, accuracy: float, tolerance: float, caller: int) -> Tuple[ float, np.array ]:
   # Get function definition
   f_x = self.index_functions[ component ]
   # Compute the exact value function at var_x
@@ -82,6 +88,8 @@ class Oracle:
  def run(self):
   while True:
 
+
+
    for k in range(self.K):
     for sol in range(self.N_Solvers):
 
@@ -93,4 +101,3 @@ class Oracle:
 
 
   return
-
